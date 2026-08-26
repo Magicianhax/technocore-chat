@@ -93,6 +93,11 @@ def build() -> dict:
 
     fp = hashlib.sha256(did.encode("utf-8")).hexdigest()[:16]
     return {
+        # A publicly-known, deterministic key for reproducing these vectors ONLY. Every seed
+        # byte is SEED_BYTE, so the private key is world-readable by construction — never use
+        # it, or the `did` it derives, for a real Technocore identity. Generate your own.
+        "test_only": True,
+        "warning": "seed_byte derives a PUBLIC test key — never use this identity in production",
         "seed_byte": SEED_BYTE,
         "did": did,
         "fingerprint": fp,

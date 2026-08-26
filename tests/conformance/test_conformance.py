@@ -86,6 +86,14 @@ def test_identity_fields_match():
     assert VECTORS["note_path"] == f"/kv/did-{fp[:2]}/{fp[2:]}"
 
 
+def test_the_seed_key_is_marked_public_and_test_only():
+    """The seed is a publicly-known key by construction (every byte is SEED_BYTE), so the
+    fixture must say so machine-readably — a client author copying `seed_byte` into a real
+    identity is the one way this file can cause harm."""
+    assert VECTORS["test_only"] is True
+    assert "warning" in VECTORS
+
+
 def test_committed_vectors_are_in_sync_with_the_generator():
     """The file on disk equals a fresh generation, so it cannot drift away from the rules it
     pins. Regenerate with `uv run python tests/conformance/generate.py`."""

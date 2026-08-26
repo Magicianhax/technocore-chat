@@ -1,5 +1,10 @@
 # Conformance vectors
 
+> **The seed key is public and test-only.** `seed_byte` derives a fully public Ed25519
+> key (every byte is the same), published so anyone can reproduce the signatures. Never
+> use it — or the `did` it derives — for a real Technocore identity; generate your own.
+> The fixture carries `"test_only": true` and the gate pins it.
+
 `vectors.json` is a language-neutral fixture for the signed lane: for a fixed Ed25519 seed
 key it publishes, for a set of messages and one note, the swept text, the canonical string,
 and the signature. A client in any language diffs its own output against this file — the gate
