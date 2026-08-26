@@ -1,0 +1,137 @@
+{
+ "seed_byte": 7,
+ "did": "did:key:z6MkvDqGT54cXesYGvABpF1UapVNwjCqRcafi4Px6Thv5T3Z",
+ "fingerprint": "f9c3f1afd7f5166a",
+ "note_path": "/kv/did-f9/c3f1afd7f5166a",
+ "messages": [
+  {
+   "text": "hello world",
+   "swept": "hello world",
+   "room": "lobby",
+   "nonce": 1,
+   "canonical": "lobby|1|hello world",
+   "sig": "fVc7wd0O78uyyk90jD7bkVmLIPeQWyrHQ2Qf9HVGKQzrImnWDUkFdRu8EvO7oiYyM7Bq90Wp8-KufIojB5MBCA"
+  },
+  {
+   "text": "a  b",
+   "swept": "a  b",
+   "room": "lobby",
+   "nonce": 2,
+   "canonical": "lobby|2|a  b",
+   "sig": "Pk7IiQqSOHP6gGSnx2hASb9BYu07d3hRvSGRMfIBIn8SUggEr0kCHtpnZgBykrpYs7_PLBNUPIjtflw9_NAyAg"
+  },
+  {
+   "text": "a\tb",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 3,
+   "canonical": "lobby|3|a b",
+   "sig": "fCBPQQXxK_30s4yMufxfgJOfFLNOXi1zjh0xv8qzgEPIN4Div2ASFwbvaS4xbeiwXfJ7ZBqOwAbSYVbmtOg-BQ"
+  },
+  {
+   "text": "a​b",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 4,
+   "canonical": "lobby|4|a b",
+   "sig": "dx7clrsx7KuXxmsd7cMORnEd5deE7FAdUGH6QBjd0Yqw56T2oSbnWGcOs25UO28zPNmhagLovhWq96AOJPoDBQ"
+  },
+  {
+   "text": "a‍b",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 5,
+   "canonical": "lobby|5|a b",
+   "sig": "V1vB0wgHWhG6p-VpKbXoW7DxGzS5FJjT2Hcaid3jVseZffZULk59EpJ_R_Ib6yEjHU-GlgTMxSk1XFS9KHF1Ag"
+  },
+  {
+   "text": "a‮b",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 6,
+   "canonical": "lobby|6|a b",
+   "sig": "q5eohO7gAkanGmiPoP52kF3boNfG7m0NNYVbdnnSwdffRcCT1OWf7JNJBHchlwr3_E7Pt1_Ega4uIN7sP2pvAw"
+  },
+  {
+   "text": "ab",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 7,
+   "canonical": "lobby|7|a b",
+   "sig": "bz6FtbZCLZ3xR-OG5X98oA7QCi204EmBxthE5Q9vnk_tga5gzjNPrZTFKEX2qI68lRTb1g4zBYM3PzlZfO0ZBQ"
+  },
+  {
+   "text": "a b",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 8,
+   "canonical": "lobby|8|a b",
+   "sig": "OVuPx01b7juH_mSo4dsI14xQCP-jXJmyNaWwPjGEDEVmlnVCgzO5xkATMTSDKhWJO9f4f_pRGDcxDmnkt93MDA"
+  },
+  {
+   "text": "a b",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 9,
+   "canonical": "lobby|9|a b",
+   "sig": "5mS1ELISv3NrLHbFD6yXxPLKZQLdF1baGFmSN7cp2RIQKWLzp9Gkf3fQ4fth4GfA0oOsIeG1b4nKNwY8eH1gCA"
+  },
+  {
+   "text": "  trim me  ",
+   "swept": "trim me",
+   "room": "lobby",
+   "nonce": 10,
+   "canonical": "lobby|10|trim me",
+   "sig": "BQgLEDxJqsqGM0xBnThyoCJyVjDeHPeYQpB_3SADl0bGeIGZnVnRb-27ZyUoCvLyBGlYQZiJR2ZMzYbmabGiCA"
+  },
+  {
+   "text": " nbsp edges ",
+   "swept": "nbsp edges",
+   "room": "lobby",
+   "nonce": 11,
+   "canonical": "lobby|11|nbsp edges",
+   "sig": "QMNiN0yytMyb6FTczG9ZqJXzyaRU_w9Kd4O_910J48wFchgi-lLQDjUSu_FaMJrDiNSoM-hoVtMyeklpfqlSBQ"
+  },
+  {
+   "text": "a b",
+   "swept": "a b",
+   "room": "lobby",
+   "nonce": 12,
+   "canonical": "lobby|12|a b",
+   "sig": "XpGKJIdBaX99obkO_kDIci5J0ytledvRH0HtvS5WEYWTBA9nzYlQVLZphTZRoQVc3X_o4MeiQ1oQpPl9XQyRDQ"
+  },
+  {
+   "text": "𝅳note",
+   "swept": "note",
+   "room": "lobby",
+   "nonce": 13,
+   "canonical": "lobby|13|note",
+   "sig": "NPrXH2U_GxzXkxWC0V6mNhPE9kOsxtfUCkMGfCeR5UrVytmg7fT18h8dDA5vHDvfzoOpyIadPGmvLBGz8O8yDQ"
+  },
+  {
+   "text": "Ünïcödé and 🚀",
+   "swept": "Ünïcödé and 🚀",
+   "room": "lobby",
+   "nonce": 14,
+   "canonical": "lobby|14|Ünïcödé and 🚀",
+   "sig": "9OoE7pKCcd7ymn4a7OIFQzNzXNxc8F0A80GgDij8qjVpi10X2pUCqn6f_AmyFD0IlxKl-NM3eRf_oks319NXBg"
+  },
+  {
+   "text": "url/significant?and=chars#x",
+   "swept": "url/significant?and=chars#x",
+   "room": "lobby",
+   "nonce": 15,
+   "canonical": "lobby|15|url/significant?and=chars#x",
+   "sig": "vjAROhtp_lbwXW6vx9Pe_MXCfl5Cpybt6SYf6B7bi3OByQA3SghoenVN5KWtWEXT2p3E5DJ46ZPDtPFK7CL7Cw"
+  }
+ ],
+ "note": {
+  "ns": "room-owners",
+  "key": "d-demo",
+  "nonce": 5,
+  "value": "did:key:z6MkvDqGT54cXesYGvABpF1UapVNwjCqRcafi4Px6Thv5T3Z",
+  "swept": "did:key:z6MkvDqGT54cXesYGvABpF1UapVNwjCqRcafi4Px6Thv5T3Z",
+  "canonical": "room-owners|d-demo|5|did:key:z6MkvDqGT54cXesYGvABpF1UapVNwjCqRcafi4Px6Thv5T3Z",
+  "sig": "_poiBZhnkR7odO5ApcaLeiV3QiwbP_qlVKb6jKLwujOZRETgHQNM8fu9cxU1hMzs_pBiZnXlug5p3tDlMhiSAQ"
+ }
+}
