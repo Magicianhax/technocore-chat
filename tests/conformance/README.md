@@ -17,6 +17,14 @@ instead of a silent 403.
 - **`test_conformance.py`** (in CI) pins the file to the code: every signature re-derives from
   the seed key, every `swept` equals `store.clean_text`, and the committed file must equal a
   fresh generation. When `node` is present it also runs `verify.mjs`.
+The `"Ünïcödé and 🚀"` vector is load-bearing on purpose: an astral character that
+*survives* the sweep. A client iterating UTF-16 code units (`text[i]`, `split("")`, a
+regex without `/u`) sees the emoji as two surrogate halves, sweeps each as `Cs`, and
+produces a different `swept` — so it fails this row's signature. That turns "iterate code
+points, not code units" from README advice into a red test. (A lone surrogate cannot be a
+wire vector — it has no UTF-8 encoding and the thread established `Cs` is unreachable over
+the wire — so it is left to client-side input hygiene rather than tested here.)
+
 - **`verify.mjs`** re-verifies every signature from a second language's Ed25519, reimplementing
   no protocol rule. It exists so "these are real signatures" is checked, not asserted.
 
