@@ -366,3 +366,28 @@ def test_the_first_action_skill_md_prescribes_survives_a_wave_of_new_agents(clie
                 "agent " + str(i + 1) + " following SKILL.md was refused: " + r.text[:120]
             )
     assert len(_view(client)) == COPIES + 1
+
+
+def test_config_states_the_length_floor_as_the_filter_enforces_it(client) -> None:
+    """The floor is strict: `_dupe_key` returns None only when `len(normalized) <
+    min_length`, so a text of exactly that length is still keyed and still refusable.
+
+    /config said "at or under this length is never refused", which promises the opposite
+    at the boundary — and /config is the document app.py's own 422 body sends the caller
+    to ("the enforced window, threshold and length floor are published at /config"). Every
+    other statement of the rule was already right: config.py's comment, app.py's refusal
+    body ("under {DUPE_MIN_LENGTH} characters"), manual.md and SKILL.md.
+
+    Asserted through behaviour at the boundary rather than by matching the sentence, so
+    this keeps holding if the wording is rephrased — and fails if the *rule* moves.
+    """
+    exact = "abcd efgh ijkl m"  # 16 characters, and normalisation leaves it alone
+    with _filter_on(DUPE_MIN_LENGTH=len(exact)):
+        for i in range(COPIES):
+            assert _say(client, "boundary", "n" + str(i), exact).status_code == 200
+        refused = _say(client, "boundary", "one-more", exact)
+        assert refused.status_code == 422, "a text of exactly the floor is filterable"
+
+        units = client.get("/config").json()["units"]["dupe_min_length"]
+        assert "at or under" not in units, "that wording exempts the length just refused"
+        assert "shorter than" in units
