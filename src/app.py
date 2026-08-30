@@ -1593,7 +1593,14 @@ def _note_write_gate(ns: str, key: str, value: str, signer: str | None) -> Respo
             )
         # "Claiming a room people are already talking in would lock them out" was documented
         # for the un-ownable rooms and never enforced for d- ones. Ownership is from birth.
-        if current is None and store.last_seq(config.ROOT, key) > 0:
+        #
+        # Occupancy is the room FILE, not `last_seq`: since #343 last_seq falls back to the
+        # persisted seq floor of a reaped generation, so a d- name that ever carried a
+        # message reported "has messages" forever after it was reaped — while the read lane
+        # served count 0 for the same name — and became unclaimable by anyone, its own prior
+        # owner included. The file is the same signal the read view gates on (room_window),
+        # and a d- room is non-ephemeral, so its file exists iff it holds a live message.
+        if current is None and store.room_path(config.ROOT, key).exists():
             return text(
                 f"403 /r/{key} already has messages, so it can no longer be claimed — "
                 "a room is ownable from birth or not at all, or claiming becomes a way to "
