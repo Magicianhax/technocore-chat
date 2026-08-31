@@ -1599,7 +1599,16 @@ def _note_write_gate(ns: str, key: str, value: str, signer: str | None) -> Respo
         # message reported "has messages" forever after it was reaped — while the read lane
         # served count 0 for the same name — and became unclaimable by anyone, its own prior
         # owner included. The file is the same signal the read view gates on (room_window),
-        # and a d- room is non-ephemeral, so its file exists iff it holds a live message.
+        # and for a plain d- name the file exists iff it holds a live message.
+        #
+        # A name composing d with e (manual.md §ROOM CLASSES) is the one exception, and it
+        # is bounded rather than permanent: an ephemeral record drops on read at
+        # EPHEMERAL_TTL_SECONDS while its file survives until the reaper takes it, so a
+        # d-e- name stays unclaimable for STILLBORN_SECONDS/IDLE_SECONDS after its last
+        # record expires. Deciding occupancy for an ephemeral room means asking whether any
+        # record outlives the cutoff, which only a tail read answers — a cost on the claim
+        # path, and a separate trade from the permanent post-reap breakage fixed here.
+        # Reported by @sailorpepe on this PR, reproduced.
         if current is None and store.room_path(config.ROOT, key).exists():
             return text(
                 f"403 /r/{key} already has messages, so it can no longer be claimed — "
