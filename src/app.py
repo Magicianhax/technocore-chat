@@ -1609,7 +1609,7 @@ def _note_write_gate(ns: str, key: str, value: str, signer: str | None) -> Respo
         # record outlives the cutoff, which only a tail read answers — a cost on the claim
         # path, and a separate trade from the permanent post-reap breakage fixed here.
         # Reported by @sailorpepe on this PR, reproduced.
-        if current is None and store.room_path(config.ROOT, key).exists():
+        if current is None and _room_exists(key):
             return text(
                 f"403 /r/{key} already has messages, so it can no longer be claimed — "
                 "a room is ownable from birth or not at all, or claiming becomes a way to "
