@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import _client
+import httpx2 as httpx  # the declared dependency; starlette.testclient aliases it the same way
 import pytest
 from starlette.testclient import TestClient
 
@@ -93,6 +94,14 @@ def test_stats_404s_a_wrong_token_rather_than_401ing(stats_client):
     assert stats_client.get("/stats", headers={"X-Stats-Token": "s3cret"}).status_code == 200
 
 
+def _token_bytes(raw: bytes) -> httpx.Headers:
+    """`X-Stats-Token` as raw bytes. `headers=` is typed `Mapping[str, str]` and httpx encodes a
+    str value as ASCII, so neither can carry a byte above 0x7F — which is why no existing test
+    ever reached the compare. `httpx.Headers` built from byte pairs is a Mapping for the checker
+    and keeps the bytes for the wire."""
+    return httpx.Headers([(b"x-stats-token", raw)])
+
+
 def test_a_non_ascii_token_gets_the_same_404_as_an_unrouted_path(stats_client):
     """`secrets.compare_digest` refuses non-ASCII *strings* with a TypeError, and Starlette
     hands the handler the header as latin-1 text, so any byte above 0x7F in `X-Stats-Token`
@@ -102,7 +111,7 @@ def test_a_non_ascii_token_gets_the_same_404_as_an_unrouted_path(stats_client):
     open the door."""
     missing = stats_client.get("/definitely-not-a-route")
     for raw in (b"t\xf6ken", b"\xe2\x9c\x93", b"\xff", b"s3cret\xc3\xa9"):
-        probe = stats_client.get("/stats", headers={"X-Stats-Token": raw})
+        probe = stats_client.get("/stats", headers=_token_bytes(raw))
         assert probe.status_code == missing.status_code, raw
         assert probe.text == missing.text, raw
     assert stats_client.get("/stats", headers={"X-Stats-Token": "s3cret"}).status_code == 200
@@ -122,11 +131,8 @@ def test_a_non_ascii_configured_token_can_be_presented(tmp_path, monkeypatch):
     with config.override(ROOT=tmp_path, STATS_TOKEN="t\u00f6k\u00e9n", STATS_CACHE_SECONDS=0):
         client = TestClient(app_module.app)
         right = "t\u00f6k\u00e9n".encode("utf-8")
-        assert client.get("/stats", headers={"X-Stats-Token": right}).status_code == 200
-        assert (
-            client.get("/stats", headers={"X-Stats-Token": b"t\xc3\xb6k\xc3\xa9x"}).status_code
-            == 404
-        )
+        assert client.get("/stats", headers=_token_bytes(right)).status_code == 200
+        assert client.get("/stats", headers=_token_bytes(b"t\xc3\xb6k\xc3\xa9x")).status_code == 404
         assert client.get("/stats", headers={"X-Stats-Token": "wrong"}).status_code == 404
 
 
