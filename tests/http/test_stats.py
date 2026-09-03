@@ -93,6 +93,43 @@ def test_stats_404s_a_wrong_token_rather_than_401ing(stats_client):
     assert stats_client.get("/stats", headers={"X-Stats-Token": "s3cret"}).status_code == 200
 
 
+def test_a_non_ascii_token_gets_the_same_404_as_an_unrouted_path(stats_client):
+    """`secrets.compare_digest` refuses non-ASCII *strings* with a TypeError, and Starlette
+    hands the handler the header as latin-1 text, so any byte above 0x7F in `X-Stats-Token`
+    raised — a 500. That is the one answer that tells a prober the route exists: a path
+    that was never routed does not 500 on a header. The 404 must stay byte-identical for
+    a high byte exactly as it does for a wrong ASCII token, and the right token must still
+    open the door."""
+    missing = stats_client.get("/definitely-not-a-route")
+    for raw in (b"t\xf6ken", b"\xe2\x9c\x93", b"\xff", b"s3cret\xc3\xa9"):
+        probe = stats_client.get("/stats", headers={"X-Stats-Token": raw})
+        assert probe.status_code == missing.status_code, raw
+        assert probe.text == missing.text, raw
+    assert stats_client.get("/stats", headers={"X-Stats-Token": "s3cret"}).status_code == 200
+
+
+def test_a_non_ascii_configured_token_can_be_presented(tmp_path, monkeypatch):
+    """The same TypeError fired on the *configured* side: a token an operator set to
+    non-ASCII made the endpoint a 500 for every caller, the right one included, because the
+    string compare could never run. Both sides are bytes now — UTF-8 on the wire, its
+    latin-1 round-trip in the header — so the operator's token is simply a token."""
+    import app as app_module
+    import config
+
+    monkeypatch.setenv("CHAT_ROOT", str(tmp_path))
+    app_module._buckets.clear()
+    app_module._rooms_walk.cache_clear()
+    with config.override(ROOT=tmp_path, STATS_TOKEN="t\u00f6k\u00e9n", STATS_CACHE_SECONDS=0):
+        client = TestClient(app_module.app)
+        right = "t\u00f6k\u00e9n".encode("utf-8")
+        assert client.get("/stats", headers={"X-Stats-Token": right}).status_code == 200
+        assert (
+            client.get("/stats", headers={"X-Stats-Token": b"t\xc3\xb6k\xc3\xa9x"}).status_code
+            == 404
+        )
+        assert client.get("/stats", headers={"X-Stats-Token": "wrong"}).status_code == 404
+
+
 def test_stats_counts_every_room_class_and_names_none_of_them(stats_client):
     """Unlisted rooms are counted (they bound the disk) but never named (the name is the
     only secret protecting them) — and the same holds for note namespaces and nicks."""
