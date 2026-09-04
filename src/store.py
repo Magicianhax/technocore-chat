@@ -2262,7 +2262,7 @@ def append(
     # Last, so the sample includes this write and any announcement it produced. Throttled
     # internally — the common call is one stat of a marker file.
     _snapshot(root)
-    return as_read(rec)  # what a write returns is what a read returns (#711)
+    return rec
 
 
 def _log_event(root: Path, line: str) -> None:
