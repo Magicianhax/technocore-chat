@@ -1231,6 +1231,7 @@ def test_the_json_view_returns_a_nineteen_digit_nonce_as_the_text_it_was_signed_
     assert posted.status_code == 200
     # The POST reply carries the same view and must agree with the GET.
     assert posted.json()["messages"][-1]["nonce"] == nonce
+    assert posted.json()["posted"]["nonce"] == nonce  # the write reply agrees with the read view
 
     record = client.get("/r/tclk-nonce-probe?format=json").json()["messages"][-1]
     assert record["nonce"] == nonce, record["nonce"]  # text, exact — not 1788508890862745600
