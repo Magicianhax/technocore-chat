@@ -623,7 +623,7 @@ def test_narrowing_only_the_guards_budget_makes_a_visible_message_replayable(tmp
         mine = [m for m in _visible(tmp_path, "lobby") if m.get("from") == did]
         assert len(mine) == 2, f"expected the original and the replay, got {len(mine)}"
         first, second = mine
-        assert first["nonce"] == second["nonce"] == 7
+        assert first["nonce"] == second["nonce"] == "7"  # the view renders a nonce as text (#711)
         assert first["text"] == second["text"] == "the guarded message"
         assert first["seq"] < second["seq"] == replayed["seq"]
         # One signature over `lobby|7|the guarded message` now authenticates both records, and
