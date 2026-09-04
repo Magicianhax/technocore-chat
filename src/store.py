@@ -870,6 +870,7 @@ def _parse(line: bytes) -> dict | None:
 # signed with — the view below and the `posted` record of a write reply both come through
 # here. /export keeps the stored bytes, by its own contract (#711).
 def as_read(rec: dict) -> dict:
+    """A stored record as a JSON lane returns it: the nonce as the digit text it was signed with."""
     return {**rec, "nonce": str(rec["nonce"])} if isinstance(rec.get("nonce"), int) else rec
 
 
