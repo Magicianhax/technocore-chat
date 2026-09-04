@@ -863,6 +863,16 @@ def _parse(line: bytes) -> dict | None:
     return rec if isinstance(rec, dict) and isinstance(rec.get("seq"), int) else None
 
 
+# A nonce arrives as 1-19 decimal digits of text (the POST schema says so) and is stored as
+# an int, which json emits bare. Nineteen digits is past 2^53: a JavaScript reader has
+# rounded it before it can rebuild `room|nonce|text`, and tclk#78 measured 40% of a live
+# board unverifiable that way. Every JSON lane hands it back as the digit text it was
+# signed with — the view below and the `posted` record of a write reply both come through
+# here. /export keeps the stored bytes, by its own contract (#711).
+def as_read(rec: dict) -> dict:
+    return {**rec, "nonce": str(rec["nonce"])} if isinstance(rec.get("nonce"), int) else rec
+
+
 def read_messages(
     root: Path, room: str, limit: int = DEFAULT_LIMIT, since: int | None = None
 ) -> dict:
@@ -885,15 +895,7 @@ def read_messages(
                     break
                 if cutoff is not None and _expired(rec, cutoff):
                     break
-                # A nonce arrives as 1-19 decimal digits of text (the POST schema says so) and
-                # is stored as an int, which json emits bare. Nineteen digits is past 2^53: a
-                # JavaScript reader has rounded it before it can rebuild `room|nonce|text`,
-                # and tclk#78 measured 40% of a live board unverifiable that way. Hand it
-                # back as the digit text it was signed with. /export keeps the stored bytes,
-                # by its own contract (#711).
-                if isinstance(rec.get("nonce"), int):
-                    rec["nonce"] = str(rec["nonce"])
-                out.append(rec)
+                out.append(as_read(rec))
                 if len(out) >= limit:
                     break
     out.reverse()
@@ -2260,7 +2262,7 @@ def append(
     # Last, so the sample includes this write and any announcement it produced. Throttled
     # internally — the common call is one stat of a marker file.
     _snapshot(root)
-    return rec
+    return as_read(rec)  # what a write returns is what a read returns (#711)
 
 
 def _log_event(root: Path, line: str) -> None:

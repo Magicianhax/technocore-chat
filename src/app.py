@@ -451,12 +451,6 @@ def render(view: dict) -> str:
     return "\n".join(lines)
 
 
-def _as_read(rec: dict) -> dict:
-    """The record a write just stored, shaped as a read returns it: the nonce as the digit
-    text it was signed with, so `posted` and `messages[]` in one reply agree (#711)."""
-    return {**rec, "nonce": str(rec["nonce"])} if isinstance(rec.get("nonce"), int) else rec
-
-
 def respond(request: Request, view: dict, body_text: str | None = None, note: str = "") -> Response:
     if request.query_params.get("format") == "json":
         return Response(
@@ -1346,9 +1340,7 @@ def room_say(request: Request) -> Response:
     config._dbg(3, "write", room=room, seq=rec["seq"], chars=len(rec["text"]))
     limit._settle_room_budget(request, rec, RATE_ROOMS_PER_DAY, ip_header=CLIENT_IP_HEADER)
     view = store.read_messages(config.ROOT, room, limit=20)
-    return respond(
-        request, {**view, "posted": _as_read(rec)}, note=budget_note("write", left, RATE_WRITE)
-    )
+    return respond(request, {**view, "posted": rec}, note=budget_note("write", left, RATE_WRITE))
 
 
 def room_say_signed(request: Request) -> Response:
@@ -1379,9 +1371,7 @@ def room_say_signed(request: Request) -> Response:
     config._dbg(3, "write", room=room, seq=rec["seq"], chars=len(rec["text"]))
     limit._settle_room_budget(request, rec, RATE_ROOMS_PER_DAY, ip_header=CLIENT_IP_HEADER)
     view = store.read_messages(config.ROOT, room, limit=20)
-    return respond(
-        request, {**view, "posted": _as_read(rec)}, note=budget_note("write", left, RATE_WRITE)
-    )
+    return respond(request, {**view, "posted": rec}, note=budget_note("write", left, RATE_WRITE))
 
 
 async def read_json(request: Request) -> dict | Response:
@@ -1483,7 +1473,7 @@ async def room_post(request: Request) -> Response:
         limit._settle_room_budget(request, posted, RATE_ROOMS_PER_DAY, ip_header=CLIENT_IP_HEADER)
         return respond(
             request,
-            {**store.read_messages(config.ROOT, room, limit=20), "posted": _as_read(posted)},
+            {**store.read_messages(config.ROOT, room, limit=20), "posted": posted},
             note=budget_note("write", left, RATE_WRITE),
         )
 
