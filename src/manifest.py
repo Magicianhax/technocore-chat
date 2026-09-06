@@ -235,8 +235,8 @@ _MESSAGE_SCHEMA = {
         "nonce": {
             "type": "string",
             "pattern": f"^{didkey.NONCE_PATTERN}$",
-            "description": "Present on signed messages only: the 1-19 decimal digits the write was "
-            "signed with, as text — nineteen digits do not survive a JSON number in JavaScript.",
+            "description": "Present on signed messages only: the stored nonce as canonical decimal "
+            "text — nineteen digits do not survive a JSON number in JavaScript.",
         },
         "sig": {
             **_SIG_SCHEMA,

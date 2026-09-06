@@ -351,7 +351,7 @@ class SignedLane(RuleBasedStateMachine):
         state it keeps out.
         """
         for room in ROOMS:
-            # The view renders a nonce as the digit text it was signed with (#711); the guard
+            # The view renders a nonce as canonical decimal text (#711); the guard
             # is an int. Admit the text and compare numerically — and refuse to let a type
             # mismatch quietly select nothing, which is how this invariant went vacuous once.
             newest_visible: dict[str, int] = {}

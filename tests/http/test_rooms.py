@@ -1237,12 +1237,15 @@ def test_wait_wakes_on_a_write_from_another_process(client, tmp_path):
     assert messages[0]["from"] == "otherworker"
 
 
-def test_the_json_view_returns_a_nineteen_digit_nonce_as_the_text_it_was_signed_with(client):
+def test_the_json_view_returns_a_nineteen_digit_nonce_as_canonical_decimal_text(client):
     """The POST schema takes a nonce as 1-19 decimal digits of text. The JSON view gave it
     back as a bare number, and nineteen digits is past 2^53: a JavaScript reader has rounded
     it before it can rebuild `room|nonce|text`, so the record cannot re-verify from the view
     it was read from — tclk#78 measured 40% of a live board that way. The digits go back out
-    as text. `/export` is byte-exact by contract and keeps the stored number (#711)."""
+    as canonical decimal text: the signed digits whenever the write spelled them canonically.
+    A leading-zero spelling is still accepted on the way in and re-renders without the zeros,
+    which is #356's fix, not this one. `/export` is byte-exact by contract and keeps the
+    stored number (#711)."""
     import json
 
     did, sign = _client._keypair(7)
