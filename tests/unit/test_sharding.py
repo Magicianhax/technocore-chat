@@ -460,8 +460,10 @@ def test_the_reaper_unlinks_the_flat_room_it_found_rather_than_migrating_it(tmp_
     read or written since the migration — which is exactly the set the reaper is here for.
 
     The count is asserted against a walk of the disk rather than against a literal: a cached
-    figure BELOW what is on disk admits creates past MAX_ROOMS, which is the one direction
-    `_settle_count` is written to fail closed in.
+    figure BELOW what is on disk admits creates past MAX_ROOMS. `_settle_count` does not
+    defend against this one — its fail-closed term, `max(0, after - before)`, covers creates
+    that landed while the walk ran, and here the corruption is in `kept` itself, which no
+    later correction can recover.
     """
     import store
 

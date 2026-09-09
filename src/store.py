@@ -1101,9 +1101,12 @@ def _tail_seq(path: Path) -> int:
     it leaves behind, which moved the very file the branch had just decided to unlink into
     its bucket, and the unlink that followed found nothing. The room then outlived its
     retention by a whole REAP_EVERY while the pass counted it reaped and subtracted it from
-    the room count — a count below the disk, which is the direction `_settle_count` fails
-    closed against. `_migrate` says the reaper "only ever unlinks"; this is what makes that
-    true rather than nearly true.
+    the room count, leaving the settled figure one below the disk for an interval —
+    creates admitted past MAX_ROOMS. `_settle_count` cannot correct that: its fail-closed
+    term is `max(0, after - before)`, which covers creates that landed *while the walk
+    ran*, and this corrupts `kept` itself, which nothing downstream can recover.
+    `_migrate` says the reaper "only ever unlinks"; this is what makes that true rather
+    than nearly true.
 
     chunk_size 4 KiB, not the 64 KiB default: this runs under the room lock on every append
     and wants exactly one record — the newest. A typical record is ~120 B, so 4 KiB holds
