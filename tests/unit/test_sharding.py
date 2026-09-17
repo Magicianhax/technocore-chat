@@ -500,7 +500,9 @@ def test_a_reaped_flat_room_is_counted_once_and_not_once_per_pass(tmp_path, monk
     assert store.counters(tmp_path)["reaped_idle"] == 1, "one room, one reap"
 
 
-def test_a_flat_room_migrated_after_its_tail_was_read_is_not_booked_as_reaped(tmp_path, monkeypatch):
+def test_a_flat_room_migrated_after_its_tail_was_read_is_not_booked_as_reaped(
+    tmp_path, monkeypatch
+):
     """The reap branch may only book a deletion it actually made (#815 review).
 
     `_tail_seq(p)` failing with FileNotFoundError covers a resolver that moves the flat file
@@ -537,7 +539,9 @@ def test_a_flat_room_migrated_after_its_tail_was_read_is_not_booked_as_reaped(tm
     # walked in the same pass. Counting the room twice is fail-closed; counting it zero times
     # admits a create past MAX_ROOMS, and that is the direction this asserts cannot happen.
     cached, disk = store._read_counts(tmp_path, store.USAGE_FILE), store._count_rooms(tmp_path)
-    assert cached is not None and cached[0] >= disk[0], f"cached count {cached} is below the disk {disk}"
+    assert cached is not None and cached[0] >= disk[0], (
+        f"cached count {cached} is below the disk {disk}"
+    )
 
     monkeypatch.setattr(store, "_tail_seq", read_then_moved)
     store._reap(tmp_path)
@@ -572,4 +576,6 @@ def test_a_flat_note_migrated_under_the_reapers_lock_is_not_booked_as_reaped(tmp
 
     assert sharded.exists(), "the note the resolver moved is alive, which is the premise"
     cached, disk = store._read_counts(tmp_path, store.NOTES_FILE), store._count_notes(tmp_path)
-    assert cached is not None and cached[0] >= disk[0], f"cached count {cached} is below the disk {disk}"
+    assert cached is not None and cached[0] >= disk[0], (
+        f"cached count {cached} is below the disk {disk}"
+    )
