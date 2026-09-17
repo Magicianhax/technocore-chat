@@ -537,9 +537,10 @@ def _migrate(legacy: Path, sharded: Path) -> None:
     room.
 
     The reaper is the one caller that can hold a legacy lock, because it locks what its walk
-    found rather than what a resolver returned. It only ever unlinks, and it re-stats by path
-    under the lock, so a file migrated out from under it fails that stat and is skipped rather
-    than deleted.
+    found rather than what a resolver returned. That lock does not exclude this move — nothing
+    here takes it — so the reaper cannot rely on the lock alone: it only ever unlinks, by path
+    and without `missing_ok`, and books a reap only when that unlink removed the file. A file
+    migrated out from under it at any point before the unlink is skipped rather than counted.
     """
     try:
         sharded.parent.mkdir(parents=True, exist_ok=True)
@@ -1105,8 +1106,10 @@ def _tail_seq(path: Path) -> int:
     creates admitted past MAX_ROOMS. `_settle_count` cannot correct that: its fail-closed
     term is `max(0, after - before)`, which covers creates that landed *while the walk
     ran*, and this corrupts `kept` itself, which nothing downstream can recover.
-    `_migrate` says the reaper "only ever unlinks"; this is what makes that true rather
-    than nearly true.
+    Reading by path removes the migration the branch caused itself. It does not stop a
+    concurrent resolver: one that moves the file before this opens it makes the open raise
+    FileNotFoundError, but one that moves it after the open does not, because the descriptor
+    stays readable. The unlink without `missing_ok` in `_reap_pass` is what covers that half.
 
     chunk_size 4 KiB, not the 64 KiB default: this runs under the room lock on every append
     and wants exactly one record — the newest. A typical record is ~120 B, so 4 KiB holds
@@ -1901,7 +1904,16 @@ def _reap_pass(root: Path, now: float) -> None:
                             # the file out from under the unlink below (see `_tail_seq`).
                             room = p.name[: -len(".jsonl")]
                             _set_seq_entry(root, room, max(0, _tail_seq(p)))
-                        p.unlink(missing_ok=True)
+                        # No `missing_ok`: the accounting below may only follow a deletion this
+                        # branch made. `_migrate` takes no lock, so a resolver can move a flat
+                        # file after the recheck — and for a room, after `_tail_seq` has read it,
+                        # since an open descriptor survives the rename. `missing_ok` turned that
+                        # into a silent no-op the pass then booked as a reap, leaving the cached
+                        # count below the disk. FileNotFoundError skips it instead; the next pass
+                        # finds the file in its bucket. The floor already written is harmless:
+                        # `last_seq` reads a floor only once the file is gone, and it is this
+                        # room's own high-water mark with the generation preserved.
+                        p.unlink()
                         held[0] -= 1
                         held[1] -= st.st_size
                         emptied.add(d := _emptied(base, entry.path, by_ns))
