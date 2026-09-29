@@ -184,11 +184,20 @@ def test_the_note_states_the_staleness_this_deployment_actually_allows(client):
             "public, max-age=0, s-maxage=30, stale-while-revalidate=60"
         )
         assert moved.json()["settings"]["static_cache_seconds"] == 30
-    # And 0 really is "no shared cache holds it", which is the half an hour cannot describe.
+    # And 0 really is "the ORIGIN shares nothing", which is the half an hour cannot describe.
     with config.override(STATIC_CACHE_SECONDS=0):
         off = client.get("/config")
         assert off.headers["cache-control"] == "no-store"
         assert off.json()["settings"]["static_cache_seconds"] == 0
+    # The note may not promise that of the whole lane. /config is Worker-routed and in
+    # edge/snapshot.py's PATHS, so on an origin 5xx the edge answers from deploy-time bytes
+    # with `s-maxage=30, stale-while-revalidate=30` — holdable for ~60s at the very setting
+    # whose point is that nothing shared holds it. This document reports what the process
+    # enforces; an absolute about every cache in front of it is the one claim it cannot make.
+    assert "nothing shared holds it" not in doc["note"], (
+        "an absolute the edge's origin-failure fallback contradicts"
+    )
+    assert "X-Origin-Fallback" in doc["note"], "the note names the answer that outlives no-store"
 
 
 def test_a_published_setting_is_a_number_json_can_carry(client):
