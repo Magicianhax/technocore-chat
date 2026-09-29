@@ -536,13 +536,27 @@ class StoreLifecycle(RuleBasedStateMachine):
 
 
 StoreLifecycle.TestCase.settings = settings(
-    # 150 rather than 40, measured rather than picked: the flat-room reap sequence
-    # (`unshard` -> `advance` past the idle rule -> `reap`, with no rule resolving the name in
-    # between, since resolving migrates it back) is deep enough that 40 examples never reached
-    # it. Against the pre-fix reaper, 150x60 found it on every one of three seeds and 40x60 on
-    # none. The deterministic interleavings live in tests/unit/test_sharding.py; this is what
-    # covers the orderings nobody wrote down.
-    max_examples=150,
+    # 40, the value this file has always had. An earlier revision of this branch raised it to
+    # 150 and claimed that reached the flat-room reap sequence; the claim was wrong twice over
+    # and @WIZARDspace caught it. `derandomize=True` below is checked BEFORE `global_force_seed`
+    # in hypothesis 6.165.10, so `--hypothesis-seed=N` is silently ignored and the "three seeds"
+    # behind that claim were one exploration run three times; the re-measurement that first
+    # appeared to defend it had the example database and the test file changing under it.
+    #
+    # Measured properly against the pre-fix reaper on current main — isolated worktree, a fresh
+    # `.hypothesis` per run, nothing else touching the tree:
+    #
+    #   derandomize=True, 150x60 (what CI runs)  found it: no
+    #   derandomize=False, 150x60, seeds 1-5     found it: 1 of 5
+    #   derandomize=False, 40x60,  seeds 1-5     found it: 3 of 5
+    #
+    # So the budget buys this bug nothing in CI, and with exploration on it is seed noise
+    # rather than budget: 40 did better than 150 here, and better than 150 did on the
+    # reviewer's Linux run, where the ordering came out the other way round. Two budgets that
+    # disagree by platform are not a guard. The guard for the flat-room reap is the pair of
+    # deterministic regressions in tests/unit/test_sharding.py, which fail on the parent commit
+    # and under mutation; this machine is here for the orderings nobody wrote down, and it
+    # explores as far at 40 as the repository has always paid for.
     stateful_step_count=60,
     deadline=None,
     # Every rule fsyncs and `advance` rewrites the whole store: slow by construction.
